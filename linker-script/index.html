@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title> - Linker Script Segments</title>
+
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    // • rendering keys, e.g.:
+                    throwOnError : false
+                  });"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://bittervan.github.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">BITTERVAN&#x27;S BLOG</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;bittervan.github.io">BITTERVAN&#x27;S BLOG</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;linker-script&#x2F;">Linker Script Segments</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-04-06</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>Linker is under the control of linker script, thus it can put the codes and variables at the correct place in a logical address space. There are 4 basic segments:</p>
+<ul>
+<li><code>.text</code> holding the programs.</li>
+<li><code>.data</code> holding initialized data.</li>
+<li><code>.rodata</code> holding read-only data.</li>
+<li><code>.bss</code> acronym for &quot;Block Starting Symbols&quot;, holding uninitialize data in a program.</li>
+</ul>
+<span id="continue-reading"></span>
+<p>Here shows a linker script used in building rCore of THU:</p>
+<pre data-lang="linker script" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-linker script "><code class="language-linker script" data-lang="linker script"><span>OUTPUT_ARCH(riscv)
+</span><span style="color:#569cd6;">ENTRY</span><span>(_start)
+</span><span>BASE_ADDRESS = </span><span style="color:#b5cea8;">0x80200000</span><span>;
+</span><span>
+</span><span style="color:#569cd6;">SECTIONS
+</span><span>{
+</span><span>	. = BASE_ADDRESS;
+</span><span>	skernel = .;
+</span><span>
+</span><span>	stext = .;
+</span><span>	.text : {
+</span><span>		*(.text.entry)
+</span><span>		*(.text .text.*)
+</span><span>	}
+</span><span>	. = </span><span style="color:#569cd6;">ALIGN</span><span>(</span><span style="color:#b5cea8;">4K</span><span>);
+</span><span>	etext = .;
+</span><span>
+</span><span>	srodata = .;
+</span><span>	.rodata : {
+</span><span>		*(.rodata .rodata.*)
+</span><span>		*(.srodata .srodata.*)
+</span><span>	}
+</span><span>	. = </span><span style="color:#569cd6;">ALIGN</span><span>(</span><span style="color:#b5cea8;">4K</span><span>);
+</span><span>	erodata = .;
+</span><span>
+</span><span>	sdata = .;
+</span><span>	.data : {
+</span><span>		*(.data .data.*)
+</span><span>		*(.sdata .sdata.*)
+</span><span>	}
+</span><span>	. = </span><span style="color:#569cd6;">ALIGN</span><span>(</span><span style="color:#b5cea8;">4K</span><span>);
+</span><span>	edata = .;
+</span><span>
+</span><span>	.bss : {
+</span><span>		*(.bss.stack)
+</span><span>		sbss = .;
+</span><span>		*(.bss .bss.*)
+</span><span>		*(.sbss .sbss.*)
+</span><span>	}
+</span><span>	. = </span><span style="color:#569cd6;">ALIGN</span><span>(</span><span style="color:#b5cea8;">4K</span><span>);
+</span><span>	ebss = .;
+</span><span>	ekernel = .;
+</span><span>
+</span><span>	/DISCARD/ : {
+</span><span>		*(.eh_frame)
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>In the script, instruction with <code>. = &lt;some_address&gt;</code> or <code>&lt;some_address&gt; = .</code> is quite helpful interacting with current address <code>.</code>. </p>
+<p>And instruction <code>ALIGN(SIZE)</code> calculates the next address that is aligned to the given block size. Here we use page size to ensure the segments are scattered in different pages, since the priviledge control of hardware is usually with a granularity of page size.</p>
+<p>The extra tags, like <code>edata</code>, <code>ebss</code> defined here can be accessed as tags in other source code files like this</p>
+<pre data-lang="rust" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#569cd6;">fn </span><span>clear_bss() {
+</span><span>	</span><span style="color:#569cd6;">extern </span><span style="color:#d69d85;">&quot;C&quot; </span><span>{
+</span><span>		</span><span style="color:#569cd6;">fn </span><span>sbss();
+</span><span>		</span><span style="color:#569cd6;">fn </span><span>ebss();
+</span><span>	}
+</span><span>	(sbss </span><span style="color:#569cd6;">as usize..</span><span>ebss </span><span style="color:#569cd6;">as usize</span><span>).for_each(|a| {
+</span><span>		</span><span style="color:#569cd6;">unsafe </span><span>{ (a </span><span style="color:#569cd6;">as *mut u8</span><span>).write_volatile(</span><span style="color:#b5cea8;">0</span><span>) }
+</span><span>	});
+</span><span>}
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://bittervan.github.io/tags/compilers/">#Compilers</a>
+                    
+                        <a href="https://bittervan.github.io/tags/operating-system/">#Operating System</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;notes-parsing&#x2F;">‹ Parsing Takeaways</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;micropython-explore&#x2F;">How Can MicroPython Run Like a OS? ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://bittervan.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

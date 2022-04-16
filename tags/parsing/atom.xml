@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title> - Parsing</title>
+	<link href="https://bittervan.github.io/tags/parsing/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://bittervan.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-04-03T00:00:00+00:00</updated>
+	<id>https://bittervan.github.io/tags/parsing/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Parsing Takeaways</title>
+		<published>2022-04-03T00:00:00+00:00</published>
+		<updated>2022-04-03T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/notes-parsing/" type="text/html"/>
+		<id>https://bittervan.github.io/notes-parsing/</id>
+		<content type="html">&lt;h2 id=&quot;cfg&quot;&gt;CFG&lt;&#x2F;h2&gt;
+&lt;p&gt;A CFG is a 4-tuple $(V, \Sigma, S,\rightarrow)$&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;$V$ is set of nonterminals&lt;&#x2F;li&gt;
+&lt;li&gt;$\Sigma$ is set of terminals&lt;&#x2F;li&gt;
+&lt;li&gt;$S\in V$ is the start symbol&lt;&#x2F;li&gt;
+&lt;li&gt;$\rightarrow\subset V\times (V\cup \Sigma)^*$ is relation, called the products&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Derivation&lt;&#x2F;strong&gt; is a sequence of replacement from left handside to &lt;strong&gt;RHS&lt;&#x2F;strong&gt; of grammar rules.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Notation&lt;&#x2F;strong&gt; $\Rightarrow^*$ means any steps of derivation.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h3 id=&quot;ambiguity-removal&quot;&gt;Ambiguity Removal&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;Nonassociative&lt;&#x2F;strong&gt; requires no more than one operators in a expression, making a expression fully parenthesized.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Precedence&lt;&#x2F;strong&gt; &lt;&#x2F;p&gt;
+&lt;p&gt;$$
+exp\rightarrow exp,addop,exp | term\\
+addop\rightarrow +|-\\
+term \rightarrow term,mulop,term|factor\\
+mulop\rightarrow *\\
+factor\rightarrow (exp) | number
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Associativity&lt;&#x2F;strong&gt; left-recursive makes left-associative, right-recuisive makes right-associative.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Dangling else&lt;&#x2F;strong&gt; this requires if a statement have else, then both the two statement inside the statement to have else statement. And for both of matched and unmatched statement, the statement between if and else must be matched.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Inessential Ambiguity&lt;&#x2F;strong&gt; the associated semantices do not depend on disambiguating rule used.&lt;&#x2F;p&gt;
+&lt;p&gt;In &lt;strong&gt;EBNF&lt;&#x2F;strong&gt;, {} stands for repetition and [] is for optionality.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ll-1&quot;&gt;LL(1)&lt;&#x2F;h2&gt;
+&lt;p&gt;This method comprises two actions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.&lt;&#x2F;li&gt;
+&lt;li&gt;Match, remove the token at the top, if it is the same as the next input token.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;first-follow&quot;&gt;First &amp;amp; Follow&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;${\rm First}(X)$ is the terminals that X can start with. And if $X\rightarrow \epsilon$, then $\epsilon\in {\rm First}(X)$.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;${\rm Follow}(X)$ is only for non-terminals, it can be calculated in these steps:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;adding $$$ to ${\rm Follow}(S)$.&lt;&#x2F;li&gt;
+&lt;li&gt;if $A\rightarrow \alpha B \beta$, adding ${\rm First}(\beta) - \epsilon$ to ${\rm Follow}(B)$&lt;&#x2F;li&gt;
+&lt;li&gt;if $A\rightarrow \alpha B$ or $A\rightarrow \alpha B\beta, \epsilon \in {\rm First}(\beta)$, then add ${\rm Follow}(A)$ to ${\rm Follow}(B)$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;parsing-table-m-n-t&quot;&gt;Parsing table $M[N, T]$&lt;&#x2F;h3&gt;
+&lt;p&gt;Here M for moves.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^*a\beta$, where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$.&lt;&#x2F;li&gt;
+&lt;li&gt;If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^\ast\epsilon$, and $S\Rightarrow^\ast\beta Aa \gamma$
+where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$. (Making $A$ disappear directly).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;left-factoring&quot;&gt;Left Factoring&lt;&#x2F;h3&gt;
+&lt;p&gt;$$
+A\rightarrow A\alpha_1 | A\alpha_2 | \ldots | A\alpha_n | \beta_1|\beta_2|\ldots|\beta_m
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+A\rightarrow \beta_1A&#x27;|\beta_2A&#x27;|\ldots|\beta_mA&#x27;\ A&#x27;\rightarrow \alpha_1A&#x27; | \alpha_2A&#x27; | \ldots | \alpha_nA&#x27;|\epsilon
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;If  there is no &lt;strong&gt;cycle&lt;&#x2F;strong&gt; and no $\epsilon$-production, then the non-terminals should be sorted in some order, and resolved in non-decreasing order. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lr-0&quot;&gt;LR(0)&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Item&lt;&#x2F;strong&gt; is yielded by production. For example, $A\rightarrow XYZ$, yields &lt;&#x2F;p&gt;
+&lt;p&gt;$$
+A\rightarrow .XYZ \\
+A\rightarrow X.YZ \\
+A\rightarrow XY.Z \\
+A\rightarrow XYZ.
+$$&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;closure&quot;&gt;Closure&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;Closure&lt;&#x2F;strong&gt; of item &lt;strong&gt;sets&lt;&#x2F;strong&gt; is constructed using two rules:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;All items I is in Closure(I).&lt;&#x2F;li&gt;
+&lt;li&gt;If $A\rightarrow \alpha .B\beta \in$ Closure(I), and $B\rightarrow \gamma$, then add $B\rightarrow .\gamma$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;this indicates at some stage of parsing process, elements inside a closure can be derived from another one in the closure.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Kernel items&lt;&#x2F;em&gt; ends with a ..&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;em&gt;Nonkernel items&lt;&#x2F;em&gt; doesn’t.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The elements added to the set can never be a kernel item.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;goto&quot;&gt;Goto&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;slr-1&quot;&gt;SLR(1)&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;lr-1&quot;&gt;LR(1)&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;lalr-1&quot;&gt;LALR(1)&lt;&#x2F;h2&gt;
+</content>
+	</entry>
+</feed>

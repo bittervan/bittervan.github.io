@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title> - Issue</title>
+	<link href="https://bittervan.github.io/tags/issue/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://bittervan.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-03-21T00:00:00+00:00</updated>
+	<id>https://bittervan.github.io/tags/issue/atom.xml</id>
+	<entry xml:lang="en">
+		<title>WebSocket Problem with Proxy</title>
+		<published>2022-03-21T00:00:00+00:00</published>
+		<updated>2022-03-21T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/issue-websocket/" type="text/html"/>
+		<id>https://bittervan.github.io/issue-websocket/</id>
+		<content type="html">&lt;!-- 
+# WebSocket on ESP32 Fails, &#x27;Not a websocket request&#x27;
+
+--- --&gt;
+&lt;p&gt;I&#x27;ve been working on build a visual studio code extension for a better developing experience on ESP32, MicroPython. But without any basic knowledge for front-end development, this process is quite tough for me.&lt;&#x2F;p&gt;
+&lt;p&gt;To establish a wireless connection, the first thing that came into my mind is that I should check the official tools. So I checked the source code of project &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;webrepl&quot;&gt;webrepl&lt;&#x2F;a&gt;, a WebREPL terminal client, which also has a coarse front-end written in Javascript.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;problem&quot;&gt;Problem&lt;&#x2F;h2&gt;
+&lt;p&gt;It seemed to be simple to connect to the webrepl server running on the board, as the code in &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;webrepl&#x2F;blob&#x2F;master&#x2F;webrepl.html&quot;&gt;webrepl.html&lt;&#x2F;a&gt; showed. But when I was using the npm package &lt;code&gt;ws&lt;&#x2F;code&gt; or &lt;code&gt;websocket&lt;&#x2F;code&gt;  in Typescript to connect to it, the connection was simply cannot be established. The error in the serial connection illustrated that&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot;&gt;&lt;code&gt;&lt;span&gt;Traceback (most recent call last):
+&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;webrepl.py&amp;quot;, line 43, in accept_conn
+&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;websocket_helper.py&amp;quot;, line 39, in server_handshakej
+&lt;&#x2F;span&gt;&lt;span&gt;OSError: Not a websocket request
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;WebREPL connection from: (&amp;#39;192.168.137.1&amp;#39;, 2935)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;At first I thought it was just like the old problems, parameters, policies, etc. So I applied WireShark to check the different between the packets sent by webrepl and the Typescript extension written by myself.&lt;&#x2F;p&gt;
+&lt;p&gt;Using the &lt;code&gt;ws&lt;&#x2F;code&gt; package to connect:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;.&#x2F;ws_pack.png&quot; alt=&quot;Packet Using ws&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Using Javascript &lt;code&gt;WebSocket&lt;&#x2F;code&gt; to conncet to the board:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;.&#x2F;js_pack.png&quot; alt=&quot;Packet Using JavaScript&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Having no idea which options to alter, I referred to the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;micropython&quot;&gt;MicroPython&lt;&#x2F;a&gt; project to find out. But the code shows that’s nothing to do with the options.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span&gt;webkey = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;None
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    l = clr.readline()
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if not &lt;&#x2F;span&gt;&lt;span&gt;l:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;raise &lt;&#x2F;span&gt;&lt;span&gt;OSError(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;EOF in headers&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;l == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#e3bbab;&quot;&gt;\r\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;#    sys.stdout.write(l)
+&lt;&#x2F;span&gt;&lt;span&gt;    h, v = [x.strip() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;l.split(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;:&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)]
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;DEBUG:
+&lt;&#x2F;span&gt;&lt;span&gt;        print((h, v))
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;h == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;Sec-WebSocket-Key&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        webkey = v
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if not &lt;&#x2F;span&gt;&lt;span&gt;webkey:
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;raise &lt;&#x2F;span&gt;&lt;span&gt;OSError(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;Not a websocket request&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;But how can &lt;code&gt;webkey == None&lt;&#x2F;code&gt; happen? The two packets both have &lt;code&gt;Sec-WebSocket-Key&lt;&#x2F;code&gt; in their fields.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;&#x2F;h2&gt;
+&lt;p&gt;Fortunately, one of my teammates found that the client was assigned with &lt;code&gt;Go-client&lt;&#x2F;code&gt;, and it was our proxy server &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Fndroid&#x2F;clash_for_windows_pkg&quot;&gt;Clash For Windows&lt;&#x2F;a&gt; who modified our packet. And turning off the proxy worked.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

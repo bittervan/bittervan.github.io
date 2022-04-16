@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title> - Courses</title>
+	<link href="https://bittervan.github.io/categories/courses/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://bittervan.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-04-16T00:00:00+00:00</updated>
+	<id>https://bittervan.github.io/categories/courses/atom.xml</id>
+	<entry xml:lang="en">
+		<title>How Can MicroPython Run Like a OS?</title>
+		<published>2022-04-16T00:00:00+00:00</published>
+		<updated>2022-04-16T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/micropython-explore/" type="text/html"/>
+		<id>https://bittervan.github.io/micropython-explore/</id>
+		<content type="html">&lt;p&gt;这里我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;xian-xiang&quot;&gt;现象&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;在 esp32 上执行如下代码&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;import webrepl
+&lt;&#x2F;span&gt;&lt;span&gt;webrepl.start()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while&lt;&#x2F;span&gt;&lt;span&gt; True&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;	print(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;loop&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;在执行完 &lt;code&gt;webrepl.start()&lt;&#x2F;code&gt; 后，没有开始循环时，使用 webrepl 客户端进行连接，连接成功后，再开始循环，&lt;code&gt;loop&lt;&#x2F;code&gt; 会输出到 serial port 和 webrepl console 中&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;如果执行的是这样的代码&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;import webrepl
+&lt;&#x2F;span&gt;&lt;span&gt;import time
+&lt;&#x2F;span&gt;&lt;span&gt;webrepl.start()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while&lt;&#x2F;span&gt;&lt;span&gt; True&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;	print(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;loop&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;	time.sleep_ms(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;则即使在循环开始以后，也能够通过 webrepl 连接上&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;在循环开始后，使用 serial 连接的终端模拟器可以直接通过 &lt;code&gt;Ctrl + C&lt;&#x2F;code&gt; 而 webrepl console 中就无法做到&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;在加入了 &lt;code&gt;time.sleep_ms(1000)&lt;&#x2F;code&gt; 的代码被加入后，在 webrepl 中也能够使用 &lt;code&gt;Ctrl + C&lt;&#x2F;code&gt; 来将循环打断&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h2 id=&quot;yi-xie-zao-qi-cai-xiang&quot;&gt;一些早期猜想&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;MicroPython 是直接跑在 MicroPython 上的，通过中断进行一切事件驱动（无法解释死循环中无法响应 webrepl 请求）&lt;&#x2F;li&gt;
+&lt;li&gt;MicroPython 是跑在 RTOS 上的，通过 RTOS 的线程级调度来实现并发，这样也能够做到事件驱动（还是无法解释死循环中无法响应 webrepl 请求）&lt;&#x2F;li&gt;
+&lt;li&gt;MicroPython 是个单线程程序，直接由自身通过轮询去处理所有的事件（这样的确可以在要输出的时候去查看所有连接上的 console，但是能输出不能接收又显得太过古怪，至少在输出的时候可以通过查看所有事件来发现要接收的信号）&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;到这里我们已经觉得把 MicroPython 当成黑箱去分析得出的结果可能非常不靠谱，所以我们从源码入手，尝试解释我们实验中遇到的现象。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-ji-shi-xian&quot;&gt;实际实现&lt;&#x2F;h2&gt;
+&lt;p&gt;我们烧录进去的二进制文件包括了 RTOS 和 MicroPython，它们一共使用三种方式来实现事件驱动：&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;baremetal-jin-xing-zhong-duan-xiang-ying&quot;&gt;Baremetal 进行中断响应&lt;&#x2F;h3&gt;
+&lt;p&gt;通过设置片上中断来进行中断响应，达到打断程序的目的。这样可以非常自由地进行操作，例如收到了 uart 的输入后，可以直接将这些输入送给 MicroPython 的 stream。这里的响应是最底层的。在这一层，MCU 和我们使用的计算机十分相似，我们完全可以用理解 PC 中断的方式来理解 esp32 的中断。&lt;&#x2F;p&gt;
+&lt;p&gt;在 MicroPython 最先开始在 FreeRTOS 上运行的时候，进行了一些初始化操作，其中进行了中断设置。我们发现&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;app_main(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; Hook for a board to run code at start up.
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; This defaults to initialising NVS.
+&lt;&#x2F;span&gt;&lt;span&gt;	MICROPY_BOARD_STARTUP();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; Create and transfer control to the MicroPython task.
+&lt;&#x2F;span&gt;&lt;span&gt;	xTaskCreatePinnedToCore(mp_task, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;mp_task&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, MP_TASK_STACK_SIZE &#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;sizeof&lt;&#x2F;span&gt;&lt;span&gt;(StackType_t), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, MP_TASK_PRIORITY, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;mp_main_task_handle, MP_TASK_COREID);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;函数启动了主线程函数 &lt;code&gt;mp_task&lt;&#x2F;code&gt;，在其开始运行的时候&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;mp_task(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void *&lt;&#x2F;span&gt;&lt;span&gt;pvParameter) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;volatile &lt;&#x2F;span&gt;&lt;span&gt;uint32_t sp = (uint32_t)get_sp();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	#if MICROPY_PY_THREAD
+&lt;&#x2F;span&gt;&lt;span&gt;	mp_thread_init(pxTaskGetStackStart(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;), MP_TASK_STACK_SIZE &#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;sizeof&lt;&#x2F;span&gt;&lt;span&gt;(uintptr_t));
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	#if CONFIG_USB_ENABLED
+&lt;&#x2F;span&gt;&lt;span&gt;	usb_init();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	#elif CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG
+&lt;&#x2F;span&gt;&lt;span&gt;	usb_serial_jtag_init();
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	#else
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_stdout_init();
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;span&gt;	machine_init();
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;进行了这些初始化操作，而通过串口输出的 &lt;code&gt;loop&lt;&#x2F;code&gt; 会因为 &lt;code&gt;Ctrl + C&lt;&#x2F;code&gt; 而停止，键盘输入没有因为死循环而被禁用，就是因为这里调用 &lt;code&gt;uart_stdout_init&lt;&#x2F;code&gt; 进行了初始化&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;uart_stdout_init(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_config_t uartcfg = {
+&lt;&#x2F;span&gt;&lt;span&gt;		.baud_rate = MICROPY_HW_UART_REPL_BAUD,
+&lt;&#x2F;span&gt;&lt;span&gt;		.data_bits = UART_DATA_8_BITS,
+&lt;&#x2F;span&gt;&lt;span&gt;		.parity = UART_PARITY_DISABLE,
+&lt;&#x2F;span&gt;&lt;span&gt;		.stop_bits = UART_STOP_BITS_1,
+&lt;&#x2F;span&gt;&lt;span&gt;		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+&lt;&#x2F;span&gt;&lt;span&gt;		.rx_flow_ctrl_thresh = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0
+&lt;&#x2F;span&gt;&lt;span&gt;	};
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_param_config(MICROPY_HW_UART_REPL, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;uartcfg);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;uint32_t rxbuf = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;129&lt;&#x2F;span&gt;&lt;span&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; IDF requires &amp;gt; 128 min
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;uint32_t txbuf = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_driver_install(MICROPY_HW_UART_REPL, rxbuf, txbuf, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_isr_handle_t handle;
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_isr_free(MICROPY_HW_UART_REPL);
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_isr_register(MICROPY_HW_UART_REPL, uart_irq_handler, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, ESP_INTR_FLAG_LOWMED | ESP_INTR_FLAG_IRAM, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;handle);
+&lt;&#x2F;span&gt;&lt;span&gt;	uart_enable_rx_intr(MICROPY_HW_UART_REPL);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;而这其中的函数 &lt;code&gt;uart_driver_install&lt;&#x2F;code&gt; 是一个 &lt;code&gt;esp-idf&lt;&#x2F;code&gt; 库函数，我们可以在官方文档中找到它的功能&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A%20b1e3c&#x2F;Untitled%204.png&quot; alt=&quot;Untitled&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A%20b1e3c&#x2F;Untitled%205.png&quot; alt=&quot;Untitled&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;这个函数将对应的中断响应程序 install 到内存的某个部分来等待中断。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;rtos-jin-xing-xian-cheng-ji-diao-du&quot;&gt;RTOS 进行线程级调度&lt;&#x2F;h3&gt;
+&lt;p&gt;此外，MicroPython 本身并不是一个单线程的程序，它也会通过 FreeROTS 的线程来执行自己的函数。比如在上面提到的，在一个没有 delay 的循环中，输出的内容仍然会被送到 webrepl 客户端，这是通过在 FreeRTOS 上 spawn 出来的线程来发送的。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;STATIC mp_obj_t ppp_connect_py(size_t n_args, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; mp_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;args, mp_map_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;kw_args) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;enum &lt;&#x2F;span&gt;&lt;span&gt;{ ARG_authmode, ARG_username, ARG_password };
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(xTaskCreatePinnedToCore(pppos_client_task, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;ppp&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;2048&lt;&#x2F;span&gt;&lt;span&gt;, self, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, (TaskHandle_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;self-&amp;gt;client_task_handle, MP_TASK_COREID) != pdPASS) {
+&lt;&#x2F;span&gt;&lt;span&gt;		mp_raise_msg(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;mp_type_RuntimeError, MP_ERROR_TEXT(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;failed to create worker task&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;));
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; mp_const_none;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在这里 spawn 出了一个线程，执行的是 &lt;code&gt;pppos_client_task&lt;&#x2F;code&gt; ，这个 task&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;static void &lt;&#x2F;span&gt;&lt;span&gt;pppos_client_task(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void *&lt;&#x2F;span&gt;&lt;span&gt;self_in) {
+&lt;&#x2F;span&gt;&lt;span&gt;	ppp_if_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;self = (ppp_if_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;)self_in;
+&lt;&#x2F;span&gt;&lt;span&gt;	uint8_t buf[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;256&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span&gt;(ulTaskNotifyTake(pdTRUE, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; err;
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; len = mp_stream_rw(self-&amp;gt;stream, buf, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;sizeof&lt;&#x2F;span&gt;&lt;span&gt;(buf), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;err, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(len &amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;			pppos_input_tcpip(self-&amp;gt;pcb, (u8_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;)buf, len);
+&lt;&#x2F;span&gt;&lt;span&gt;		}
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	self-&amp;gt;client_task_handle = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	vTaskDelete(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;的功能就是不断从 MicroPython 的 I&#x2F;O stream 中取东西，交由 PPP 来进行处理。由于是另一个线程，会被 FreeRTOS 调度出来，也就不会被 MicroPython 主线程上的循环给 block 住了。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;micropython-jin-xing-shi-jian-xiang-ying&quot;&gt;MicroPython 进行事件响应&lt;&#x2F;h3&gt;
+&lt;p&gt;那么为什么对 webrepl server 的连接请求又会被 block 呢？MicroPython 内部还有一套原生的 Event 系统，这些 events 会在特定的时候被放到 MicroPython 的 foreground 来运行。还是以 webrepl 为例，等待 webrepl client 的连接请求显然是被放到了 background 中的，而无法在没有 sleep 的循环中直接被响应又告诉我们这并不在另一个线程上运行，也并非中断。&lt;&#x2F;p&gt;
+&lt;p&gt;MicroPython 本身维护了一个链表，记录着那些需要被处理的回调函数&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span&gt;setup_conn(port, accept_handler):
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;global &lt;&#x2F;span&gt;&lt;span&gt;listen_s
+&lt;&#x2F;span&gt;&lt;span&gt;	listen_s = socket.socket()
+&lt;&#x2F;span&gt;&lt;span&gt;	listen_s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	ai = socket.getaddrinfo(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;0.0.0.0&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, port)
+&lt;&#x2F;span&gt;&lt;span&gt;	addr = ai[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;][&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	listen_s.bind(addr)
+&lt;&#x2F;span&gt;&lt;span&gt;	listen_s.listen(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;accept_handler:
+&lt;&#x2F;span&gt;&lt;span&gt;		listen_s.setsockopt(socket.SOL_SOCKET, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt;, accept_handler)
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;(network.AP_IF, network.STA_IF):
+&lt;&#x2F;span&gt;&lt;span&gt;		iface = network.WLAN(i)
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;iface.active():
+&lt;&#x2F;span&gt;&lt;span&gt;			print(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;WebREPL daemon started on ws:&#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b4cea8;&quot;&gt;%s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b4cea8;&quot;&gt;%d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span&gt;% (iface.ifconfig()[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;], port))
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;listen_s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这段 Python 代码调用了一个用 C 语言编写的函数&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;STATIC mp_obj_t socket_setsockopt(size_t n_args, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; mp_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;args) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	#if MICROPY_PY_USOCKET_EVENTS
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; level: SOL_SOCKET
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; special &amp;quot;register callback&amp;quot; option
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(args[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;] == mp_const_none) {
+&lt;&#x2F;span&gt;&lt;span&gt;			&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(self-&amp;gt;events_callback != MP_OBJ_NULL) {
+&lt;&#x2F;span&gt;&lt;span&gt;				usocket_events_remove(self);
+&lt;&#x2F;span&gt;&lt;span&gt;				self-&amp;gt;events_callback = MP_OBJ_NULL;
+&lt;&#x2F;span&gt;&lt;span&gt;			}
+&lt;&#x2F;span&gt;&lt;span&gt;		} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;			&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(self-&amp;gt;events_callback == MP_OBJ_NULL) {
+&lt;&#x2F;span&gt;&lt;span&gt;				usocket_events_add(self);
+&lt;&#x2F;span&gt;&lt;span&gt;			}
+&lt;&#x2F;span&gt;&lt;span&gt;			self-&amp;gt;events_callback = args[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;		}
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; mp_const_none;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这里将自己这个 socket 对象添加到 events 链表中，调用的是函数 &lt;code&gt;usocket_events_add&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;STATIC &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;usocket_events_add(socket_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;sock) {
+&lt;&#x2F;span&gt;&lt;span&gt;	sock-&amp;gt;events_next = usocket_events_head;
+&lt;&#x2F;span&gt;&lt;span&gt;	usocket_events_head = sock;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;将事件添加到链表头。而处理这些回调函数（事件）的，是在主线程中主动调用的函数，使用了类似轮询的方式，不断查看有没有需要处理的事件。比如处理 &lt;code&gt;usocket&lt;&#x2F;code&gt; 事件的&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;usocket_events_handler(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(usocket_events_head == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(--usocket_events_divisor) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	usocket_events_divisor = USOCKET_EVENTS_DIVISOR;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	fd_set rfds;
+&lt;&#x2F;span&gt;&lt;span&gt;	FD_ZERO(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;rfds);
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; max_fd = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;(socket_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;s = usocket_events_head; s != &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;; s = s-&amp;gt;events_next) {
+&lt;&#x2F;span&gt;&lt;span&gt;		FD_SET(s-&amp;gt;fd, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;rfds);
+&lt;&#x2F;span&gt;&lt;span&gt;		max_fd = MAX(max_fd, s-&amp;gt;fd);
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; Poll the sockets
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;struct&lt;&#x2F;span&gt;&lt;span&gt; timeval timeout = { .tv_sec = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, .tv_usec = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;};
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; r = select(max_fd + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;rfds, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;timeout);
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(r &amp;lt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; Call the callbacks
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;(socket_obj_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;s = usocket_events_head; s != &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;; s = s-&amp;gt;events_next) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(FD_ISSET(s-&amp;gt;fd, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;rfds)) {
+&lt;&#x2F;span&gt;&lt;span&gt;			mp_call_function_1_protected(s-&amp;gt;events_callback, s);
+&lt;&#x2F;span&gt;&lt;span&gt;		}
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;就在每次被调用到的时候取处理我们添加到链表中的 events. 而在很多函数中，我们都能够找到这个函数以宏的形式得到了调用&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A%20b1e3c&#x2F;Untitled%206.png&quot; alt=&quot;Untitled&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;#define MICROPY_EVENT_POLL_HOOK \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;do &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;{ \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;extern void &lt;&#x2F;span&gt;&lt;span&gt;mp_handle_pending&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;bool&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;); \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	&lt;&#x2F;span&gt;&lt;span&gt;mp_handle_pending&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;); \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	MICROPY_PY_USOCKET_EVENTS_HANDLER \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	&lt;&#x2F;span&gt;&lt;span&gt;MP_THREAD_GIL_EXIT&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(); \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	&lt;&#x2F;span&gt;&lt;span&gt;ulTaskNotifyTake&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(pdFALSE, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;); \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;	&lt;&#x2F;span&gt;&lt;span&gt;MP_THREAD_GIL_ENTER&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(); \
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#9b9b9b;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;img src=&quot;%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A%20b1e3c&#x2F;Untitled%207.png&quot; alt=&quot;Untitled&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;在这些地方，都会检查是否有还未被处理的 event，然后直接由主线程进行处理。较为典型的，有在 repl 获取命令时的 &lt;code&gt;mp_task() --&amp;gt; pyexec_friendly_repo() --&amp;gt; readline() --&amp;gt; mp_hal_stdin_rx_chr()&lt;&#x2F;code&gt; 中，就使用了这个宏&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span&gt;mp_hal_stdin_rx_chr(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;(;;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; c = ringbuf_get(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;stdin_ringbuf);
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(c != -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;			&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; c;
+&lt;&#x2F;span&gt;&lt;span&gt;		}
+&lt;&#x2F;span&gt;&lt;span&gt;		MICROPY_EVENT_POLL_HOOK
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;我们在来看 &lt;code&gt;time.sleep_ms&lt;&#x2F;code&gt; 的实现&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;STATIC mp_obj_t time_sleep_ms(mp_obj_t arg) {
+&lt;&#x2F;span&gt;&lt;span&gt;	mp_int_t ms = mp_obj_get_int(arg);
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(ms &amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		mp_hal_delay_ms(ms);
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; mp_const_none;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;而这里调用的 &lt;code&gt;mp_hal_delay_ms&lt;&#x2F;code&gt; 中，又有查询 socket 中事件的宏&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;mp_hal_delay_ms(uint32_t ms) {
+&lt;&#x2F;span&gt;&lt;span&gt;	uint64_t us = ms &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;	uint64_t dt;
+&lt;&#x2F;span&gt;&lt;span&gt;	uint64_t t0 = esp_timer_get_time();
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;(;;) {
+&lt;&#x2F;span&gt;&lt;span&gt;		mp_handle_pending(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;		MICROPY_PY_USOCKET_EVENTS_HANDLER
+&lt;&#x2F;span&gt;&lt;span&gt;		MP_THREAD_GIL_EXIT();
+&lt;&#x2F;span&gt;&lt;span&gt;		uint64_t t1 = esp_timer_get_time();
+&lt;&#x2F;span&gt;&lt;span&gt;		dt = t1 - t0;
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(dt + portTICK_PERIOD_MS &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1000 &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;= us) {
+&lt;&#x2F;span&gt;&lt;span&gt;			&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; doing a vTaskDelay would take us beyond requested delay time
+&lt;&#x2F;span&gt;&lt;span&gt;			taskYIELD();
+&lt;&#x2F;span&gt;&lt;span&gt;			MP_THREAD_GIL_ENTER();
+&lt;&#x2F;span&gt;&lt;span&gt;			t1 = esp_timer_get_time();
+&lt;&#x2F;span&gt;&lt;span&gt;			dt = t1 - t0;
+&lt;&#x2F;span&gt;&lt;span&gt;			&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;		} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;			ulTaskNotifyTake(pdFALSE, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;			MP_THREAD_GIL_ENTER();
+&lt;&#x2F;span&gt;&lt;span&gt;		}
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(dt &amp;lt; us) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; do the remaining delay accurately
+&lt;&#x2F;span&gt;&lt;span&gt;		mp_hal_delay_us(us - dt);
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;所以我们在进行 &lt;code&gt;time.sleep_ms&lt;&#x2F;code&gt; 的时候，也能够响应 socket 的事件。&lt;&#x2F;p&gt;
+&lt;p&gt;综上，MicroPython 用三种不同的机制来实现了类似事件驱动的效果。感觉这样做似乎并不太 elegant，但可能出于性能考虑选取的最优解，三种方式的开销也确实一种比一种小。本次阅读 MicroPython 源码使我们获益良多。（虽然他们把 initializer 拼成 initialiser）&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;boot-py-main-py-de-yun-xing&quot;&gt;boot.py, main.py 的运行&lt;&#x2F;h2&gt;
+&lt;p&gt;运行这两个文件的代码也在 &lt;code&gt;mp_task&lt;&#x2F;code&gt; 中&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;mp_task(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;void *&lt;&#x2F;span&gt;&lt;span&gt;pvParameter) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; run boot-up scripts
+&lt;&#x2F;span&gt;&lt;span&gt;    pyexec_frozen_module(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;_boot.py&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    pyexec_file_if_exists(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;boot.py&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; ret = pyexec_file_if_exists(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;main.py&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(ret &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt; PYEXEC_FORCED_EXIT) {
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;goto&lt;&#x2F;span&gt;&lt;span&gt; soft_reset_exit;
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;goto&lt;&#x2F;span&gt;&lt;span&gt; soft_reset;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;最后这个文件中读出来的内容都去调了这个函数&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span&gt;pyexec_file(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;const char *&lt;&#x2F;span&gt;&lt;span&gt;filename) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;parse_compile_execute(filename, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_FILENAME);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;和 REPL 中我们的输入共用一个函数，只是改变了一个参数，这个参数仅带来 parse 的不同&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;mp_parse_tree_t mp_parse(mp_lexer_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span&gt;lex, mp_parse_input_kind_t input_kind) {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;&#x2F;&#x2F; work out the top-level rule to use, and push it on the stack
+&lt;&#x2F;span&gt;&lt;span&gt;    size_t top_level_rule;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;switch &lt;&#x2F;span&gt;&lt;span&gt;(input_kind) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;case&lt;&#x2F;span&gt;&lt;span&gt; MP_PARSE_SINGLE_INPUT:
+&lt;&#x2F;span&gt;&lt;span&gt;            top_level_rule = RULE_single_input;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;case&lt;&#x2F;span&gt;&lt;span&gt; MP_PARSE_EVAL_INPUT:
+&lt;&#x2F;span&gt;&lt;span&gt;            top_level_rule = RULE_eval_input;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;default&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            top_level_rule = RULE_file_input;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    push_rule(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;parser, lex-&amp;gt;tok_line, top_level_rule, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;运行这两个文件的方式不过是读出来然后直接解释执行。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Parsing Takeaways</title>
+		<published>2022-04-03T00:00:00+00:00</published>
+		<updated>2022-04-03T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/notes-parsing/" type="text/html"/>
+		<id>https://bittervan.github.io/notes-parsing/</id>
+		<content type="html">&lt;h2 id=&quot;cfg&quot;&gt;CFG&lt;&#x2F;h2&gt;
+&lt;p&gt;A CFG is a 4-tuple $(V, \Sigma, S,\rightarrow)$&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;$V$ is set of nonterminals&lt;&#x2F;li&gt;
+&lt;li&gt;$\Sigma$ is set of terminals&lt;&#x2F;li&gt;
+&lt;li&gt;$S\in V$ is the start symbol&lt;&#x2F;li&gt;
+&lt;li&gt;$\rightarrow\subset V\times (V\cup \Sigma)^*$ is relation, called the products&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Derivation&lt;&#x2F;strong&gt; is a sequence of replacement from left handside to &lt;strong&gt;RHS&lt;&#x2F;strong&gt; of grammar rules.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Notation&lt;&#x2F;strong&gt; $\Rightarrow^*$ means any steps of derivation.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h3 id=&quot;ambiguity-removal&quot;&gt;Ambiguity Removal&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;Nonassociative&lt;&#x2F;strong&gt; requires no more than one operators in a expression, making a expression fully parenthesized.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Precedence&lt;&#x2F;strong&gt; &lt;&#x2F;p&gt;
+&lt;p&gt;$$
+exp\rightarrow exp,addop,exp | term\\
+addop\rightarrow +|-\\
+term \rightarrow term,mulop,term|factor\\
+mulop\rightarrow *\\
+factor\rightarrow (exp) | number
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Associativity&lt;&#x2F;strong&gt; left-recursive makes left-associative, right-recuisive makes right-associative.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Dangling else&lt;&#x2F;strong&gt; this requires if a statement have else, then both the two statement inside the statement to have else statement. And for both of matched and unmatched statement, the statement between if and else must be matched.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Inessential Ambiguity&lt;&#x2F;strong&gt; the associated semantices do not depend on disambiguating rule used.&lt;&#x2F;p&gt;
+&lt;p&gt;In &lt;strong&gt;EBNF&lt;&#x2F;strong&gt;, {} stands for repetition and [] is for optionality.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ll-1&quot;&gt;LL(1)&lt;&#x2F;h2&gt;
+&lt;p&gt;This method comprises two actions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.&lt;&#x2F;li&gt;
+&lt;li&gt;Match, remove the token at the top, if it is the same as the next input token.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;first-follow&quot;&gt;First &amp;amp; Follow&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;${\rm First}(X)$ is the terminals that X can start with. And if $X\rightarrow \epsilon$, then $\epsilon\in {\rm First}(X)$.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;${\rm Follow}(X)$ is only for non-terminals, it can be calculated in these steps:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;adding $$$ to ${\rm Follow}(S)$.&lt;&#x2F;li&gt;
+&lt;li&gt;if $A\rightarrow \alpha B \beta$, adding ${\rm First}(\beta) - \epsilon$ to ${\rm Follow}(B)$&lt;&#x2F;li&gt;
+&lt;li&gt;if $A\rightarrow \alpha B$ or $A\rightarrow \alpha B\beta, \epsilon \in {\rm First}(\beta)$, then add ${\rm Follow}(A)$ to ${\rm Follow}(B)$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;parsing-table-m-n-t&quot;&gt;Parsing table $M[N, T]$&lt;&#x2F;h3&gt;
+&lt;p&gt;Here M for moves.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^*a\beta$, where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$.&lt;&#x2F;li&gt;
+&lt;li&gt;If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^\ast\epsilon$, and $S\Rightarrow^\ast\beta Aa \gamma$
+where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$. (Making $A$ disappear directly).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;left-factoring&quot;&gt;Left Factoring&lt;&#x2F;h3&gt;
+&lt;p&gt;$$
+A\rightarrow A\alpha_1 | A\alpha_2 | \ldots | A\alpha_n | \beta_1|\beta_2|\ldots|\beta_m
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$
+A\rightarrow \beta_1A&#x27;|\beta_2A&#x27;|\ldots|\beta_mA&#x27;\ A&#x27;\rightarrow \alpha_1A&#x27; | \alpha_2A&#x27; | \ldots | \alpha_nA&#x27;|\epsilon
+$$&lt;&#x2F;p&gt;
+&lt;p&gt;If  there is no &lt;strong&gt;cycle&lt;&#x2F;strong&gt; and no $\epsilon$-production, then the non-terminals should be sorted in some order, and resolved in non-decreasing order. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lr-0&quot;&gt;LR(0)&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Item&lt;&#x2F;strong&gt; is yielded by production. For example, $A\rightarrow XYZ$, yields &lt;&#x2F;p&gt;
+&lt;p&gt;$$
+A\rightarrow .XYZ \\
+A\rightarrow X.YZ \\
+A\rightarrow XY.Z \\
+A\rightarrow XYZ.
+$$&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;closure&quot;&gt;Closure&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;Closure&lt;&#x2F;strong&gt; of item &lt;strong&gt;sets&lt;&#x2F;strong&gt; is constructed using two rules:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;All items I is in Closure(I).&lt;&#x2F;li&gt;
+&lt;li&gt;If $A\rightarrow \alpha .B\beta \in$ Closure(I), and $B\rightarrow \gamma$, then add $B\rightarrow .\gamma$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;this indicates at some stage of parsing process, elements inside a closure can be derived from another one in the closure.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Kernel items&lt;&#x2F;em&gt; ends with a ..&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;em&gt;Nonkernel items&lt;&#x2F;em&gt; doesn’t.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The elements added to the set can never be a kernel item.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;goto&quot;&gt;Goto&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;slr-1&quot;&gt;SLR(1)&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;lr-1&quot;&gt;LR(1)&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;lalr-1&quot;&gt;LALR(1)&lt;&#x2F;h2&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>WebSocket Problem with Proxy</title>
+		<published>2022-03-21T00:00:00+00:00</published>
+		<updated>2022-03-21T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/issue-websocket/" type="text/html"/>
+		<id>https://bittervan.github.io/issue-websocket/</id>
+		<content type="html">&lt;!-- 
+# WebSocket on ESP32 Fails, &#x27;Not a websocket request&#x27;
+
+--- --&gt;
+&lt;p&gt;I&#x27;ve been working on build a visual studio code extension for a better developing experience on ESP32, MicroPython. But without any basic knowledge for front-end development, this process is quite tough for me.&lt;&#x2F;p&gt;
+&lt;p&gt;To establish a wireless connection, the first thing that came into my mind is that I should check the official tools. So I checked the source code of project &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;webrepl&quot;&gt;webrepl&lt;&#x2F;a&gt;, a WebREPL terminal client, which also has a coarse front-end written in Javascript.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;problem&quot;&gt;Problem&lt;&#x2F;h2&gt;
+&lt;p&gt;It seemed to be simple to connect to the webrepl server running on the board, as the code in &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;webrepl&#x2F;blob&#x2F;master&#x2F;webrepl.html&quot;&gt;webrepl.html&lt;&#x2F;a&gt; showed. But when I was using the npm package &lt;code&gt;ws&lt;&#x2F;code&gt; or &lt;code&gt;websocket&lt;&#x2F;code&gt;  in Typescript to connect to it, the connection was simply cannot be established. The error in the serial connection illustrated that&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot;&gt;&lt;code&gt;&lt;span&gt;Traceback (most recent call last):
+&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;webrepl.py&amp;quot;, line 43, in accept_conn
+&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;websocket_helper.py&amp;quot;, line 39, in server_handshakej
+&lt;&#x2F;span&gt;&lt;span&gt;OSError: Not a websocket request
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;WebREPL connection from: (&amp;#39;192.168.137.1&amp;#39;, 2935)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;At first I thought it was just like the old problems, parameters, policies, etc. So I applied WireShark to check the different between the packets sent by webrepl and the Typescript extension written by myself.&lt;&#x2F;p&gt;
+&lt;p&gt;Using the &lt;code&gt;ws&lt;&#x2F;code&gt; package to connect:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;.&#x2F;ws_pack.png&quot; alt=&quot;Packet Using ws&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Using Javascript &lt;code&gt;WebSocket&lt;&#x2F;code&gt; to conncet to the board:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;.&#x2F;js_pack.png&quot; alt=&quot;Packet Using JavaScript&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Having no idea which options to alter, I referred to the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;micropython&#x2F;micropython&quot;&gt;MicroPython&lt;&#x2F;a&gt; project to find out. But the code shows that’s nothing to do with the options.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span&gt;webkey = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;None
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    l = clr.readline()
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if not &lt;&#x2F;span&gt;&lt;span&gt;l:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;raise &lt;&#x2F;span&gt;&lt;span&gt;OSError(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;EOF in headers&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;l == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#e3bbab;&quot;&gt;\r\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;break
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#608b4e;&quot;&gt;#    sys.stdout.write(l)
+&lt;&#x2F;span&gt;&lt;span&gt;    h, v = [x.strip() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;l.split(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;:&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)]
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;DEBUG:
+&lt;&#x2F;span&gt;&lt;span&gt;        print((h, v))
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;h == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;Sec-WebSocket-Key&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        webkey = v
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;if not &lt;&#x2F;span&gt;&lt;span&gt;webkey:
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;raise &lt;&#x2F;span&gt;&lt;span&gt;OSError(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;Not a websocket request&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;But how can &lt;code&gt;webkey == None&lt;&#x2F;code&gt; happen? The two packets both have &lt;code&gt;Sec-WebSocket-Key&lt;&#x2F;code&gt; in their fields.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;&#x2F;h2&gt;
+&lt;p&gt;Fortunately, one of my teammates found that the client was assigned with &lt;code&gt;Go-client&lt;&#x2F;code&gt;, and it was our proxy server &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Fndroid&#x2F;clash_for_windows_pkg&quot;&gt;Clash For Windows&lt;&#x2F;a&gt; who modified our packet. And turning off the proxy worked.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

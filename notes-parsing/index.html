@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title> - Parsing Takeaways</title>
+
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    // • rendering keys, e.g.:
+                    throwOnError : false
+                  });"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://bittervan.github.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">BITTERVAN&#x27;S BLOG</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;bittervan.github.io">BITTERVAN&#x27;S BLOG</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#cfg" class="toc-link">CFG</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#ambiguity-removal" class="toc-link">Ambiguity Removal</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#ll-1" class="toc-link">LL(1)</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#first-follow" class="toc-link">First &amp; Follow</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#parsing-table-m-n-t" class="toc-link">Parsing table $M[N, T]$</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#left-factoring" class="toc-link">Left Factoring</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#lr-0" class="toc-link">LR(0)</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#closure" class="toc-link">Closure</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://bittervan.github.io/notes-parsing/#goto" class="toc-link">Goto</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#slr-1" class="toc-link">SLR(1)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#lr-1" class="toc-link">LR(1)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://bittervan.github.io/notes-parsing/#lalr-1" class="toc-link">LALR(1)</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;notes-parsing&#x2F;">Parsing Takeaways</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-04-03</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="cfg">CFG</h2>
+<p>A CFG is a 4-tuple $(V, \Sigma, S,\rightarrow)$</p>
+<ul>
+<li>$V$ is set of nonterminals</li>
+<li>$\Sigma$ is set of terminals</li>
+<li>$S\in V$ is the start symbol</li>
+<li>$\rightarrow\subset V\times (V\cup \Sigma)^*$ is relation, called the products</li>
+</ul>
+<p><strong>Derivation</strong> is a sequence of replacement from left handside to <strong>RHS</strong> of grammar rules.</p>
+<p><strong>Notation</strong> $\Rightarrow^*$ means any steps of derivation.</p>
+<span id="continue-reading"></span><h3 id="ambiguity-removal">Ambiguity Removal</h3>
+<p><strong>Nonassociative</strong> requires no more than one operators in a expression, making a expression fully parenthesized.</p>
+<p><strong>Precedence</strong> </p>
+<p>$$
+exp\rightarrow exp,addop,exp | term\\
+addop\rightarrow +|-\\
+term \rightarrow term,mulop,term|factor\\
+mulop\rightarrow *\\
+factor\rightarrow (exp) | number
+$$</p>
+<p><strong>Associativity</strong> left-recursive makes left-associative, right-recuisive makes right-associative.</p>
+<p><strong>Dangling else</strong> this requires if a statement have else, then both the two statement inside the statement to have else statement. And for both of matched and unmatched statement, the statement between if and else must be matched.</p>
+<p><strong>Inessential Ambiguity</strong> the associated semantices do not depend on disambiguating rule used.</p>
+<p>In <strong>EBNF</strong>, {} stands for repetition and [] is for optionality.</p>
+<h2 id="ll-1">LL(1)</h2>
+<p>This method comprises two actions:</p>
+<ul>
+<li>Generate, for a generative rule $A\rightarrow\alpha$, the nonterminal at the top of the stack can be replaced by $\alpha$.</li>
+<li>Match, remove the token at the top, if it is the same as the next input token.</li>
+</ul>
+<h3 id="first-follow">First &amp; Follow</h3>
+<ul>
+<li>
+<p>${\rm First}(X)$ is the terminals that X can start with. And if $X\rightarrow \epsilon$, then $\epsilon\in {\rm First}(X)$.</p>
+</li>
+<li>
+<p>${\rm Follow}(X)$ is only for non-terminals, it can be calculated in these steps:</p>
+<ol>
+<li>adding $$$ to ${\rm Follow}(S)$.</li>
+<li>if $A\rightarrow \alpha B \beta$, adding ${\rm First}(\beta) - \epsilon$ to ${\rm Follow}(B)$</li>
+<li>if $A\rightarrow \alpha B$ or $A\rightarrow \alpha B\beta, \epsilon \in {\rm First}(\beta)$, then add ${\rm Follow}(A)$ to ${\rm Follow}(B)$.</li>
+</ol>
+</li>
+</ul>
+<h3 id="parsing-table-m-n-t">Parsing table $M[N, T]$</h3>
+<p>Here M for moves.</p>
+<ul>
+<li>If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^*a\beta$, where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$.</li>
+<li>If $A\rightarrow \alpha$ is a production rule, and there is a derivation $\alpha \Rightarrow^\ast\epsilon$, and $S\Rightarrow^\ast\beta Aa \gamma$
+where $a$ is a token, then add $A\rightarrow \alpha$ to $M[A, a]$. (Making $A$ disappear directly).</li>
+</ul>
+<h3 id="left-factoring">Left Factoring</h3>
+<p>$$
+A\rightarrow A\alpha_1 | A\alpha_2 | \ldots | A\alpha_n | \beta_1|\beta_2|\ldots|\beta_m
+$$</p>
+<p>$$
+A\rightarrow \beta_1A'|\beta_2A'|\ldots|\beta_mA'\ A'\rightarrow \alpha_1A' | \alpha_2A' | \ldots | \alpha_nA'|\epsilon
+$$</p>
+<p>If  there is no <strong>cycle</strong> and no $\epsilon$-production, then the non-terminals should be sorted in some order, and resolved in non-decreasing order. </p>
+<h2 id="lr-0">LR(0)</h2>
+<p><strong>Item</strong> is yielded by production. For example, $A\rightarrow XYZ$, yields </p>
+<p>$$
+A\rightarrow .XYZ \\
+A\rightarrow X.YZ \\
+A\rightarrow XY.Z \\
+A\rightarrow XYZ.
+$$</p>
+<h3 id="closure">Closure</h3>
+<p><strong>Closure</strong> of item <strong>sets</strong> is constructed using two rules:</p>
+<ul>
+<li>All items I is in Closure(I).</li>
+<li>If $A\rightarrow \alpha .B\beta \in$ Closure(I), and $B\rightarrow \gamma$, then add $B\rightarrow .\gamma$.</li>
+</ul>
+<p>this indicates at some stage of parsing process, elements inside a closure can be derived from another one in the closure.</p>
+<ul>
+<li><em>Kernel items</em> ends with a ..</li>
+<li><em>Nonkernel items</em> doesn’t.</li>
+</ul>
+<p>The elements added to the set can never be a kernel item.</p>
+<h3 id="goto">Goto</h3>
+<h2 id="slr-1">SLR(1)</h2>
+<h2 id="lr-1">LR(1)</h2>
+<h2 id="lalr-1">LALR(1)</h2>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://bittervan.github.io/tags/compilers/">#Compilers</a>
+                    
+                        <a href="https://bittervan.github.io/tags/parsing/">#Parsing</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;issue-websocket&#x2F;">‹ WebSocket Problem with Proxy</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;linker-script&#x2F;">Linker Script Segments ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://bittervan.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

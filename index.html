@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title></title>
+
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    // • rendering keys, e.g.:
+                    throwOnError : false
+                  });"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://bittervan.github.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">BITTERVAN&#x27;S BLOG</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;bittervan.github.io">BITTERVAN&#x27;S BLOG</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+                        <div class="posts">
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;micropython-explore&#x2F;">How Can MicroPython Run Like a OS?</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-04-16</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>这里我们以 MicroPython 和 REPL 的交互为例，探索 MicroPython 为什么能和一个 OS 一样做到被事件驱动，而非顺序执行。</p>
+<h2 id="xian-xiang">现象</h2>
+<ul>
+<li>
+<p>在 esp32 上执行如下代码</p>
+<pre data-lang="c" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-c "><code class="language-c" data-lang="c"><span>import webrepl
+</span><span>webrepl.start()
+</span><span style="color:#569cd6;">while</span><span> True</span><span style="color:#569cd6;">:
+</span><span>	print(</span><span style="color:#d69d85;">&quot;loop&quot;</span><span>)
+</span></code></pre>
+<p>后，使用 webrepl 客户端进行连接，无法在板上 serial port 和 webrepl console 中看到任何相关内容</p>
+</li>
+<li>
+<p>在执行完 <code>webrepl.start()</code> 后，没有开始循环时，使用 webrepl 客户端进行连接，连接成功后，再开始循环，<code>loop</code> 会输出到 serial port 和 webrepl console 中</p>
+</li>
+<li>
+<p>如果执行的是这样的代码</p>
+<pre data-lang="c" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-c "><code class="language-c" data-lang="c"><span>import webrepl
+</span><span>import time
+</span><span>webrepl.start()
+</span><span style="color:#569cd6;">while</span><span> True</span><span style="color:#569cd6;">:
+</span><span>	print(</span><span style="color:#d69d85;">&quot;loop&quot;</span><span>)
+</span><span>	time.sleep_ms(</span><span style="color:#b5cea8;">1000</span><span>)
+</span></code></pre>
+<p>则即使在循环开始以后，也能够通过 webrepl 连接上</p>
+</li>
+<li>
+<p>在循环开始后，使用 serial 连接的终端模拟器可以直接通过 <code>Ctrl + C</code> 而 webrepl console 中就无法做到</p>
+</li>
+<li>
+<p>在加入了 <code>time.sleep_ms(1000)</code> 的代码被加入后，在 webrepl 中也能够使用 <code>Ctrl + C</code> 来将循环打断</p>
+</li>
+</ul>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;micropython-explore&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;linker-script&#x2F;">Linker Script Segments</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-04-06</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>Linker is under the control of linker script, thus it can put the codes and variables at the correct place in a logical address space. There are 4 basic segments:</p>
+<ul>
+<li><code>.text</code> holding the programs.</li>
+<li><code>.data</code> holding initialized data.</li>
+<li><code>.rodata</code> holding read-only data.</li>
+<li><code>.bss</code> acronym for &quot;Block Starting Symbols&quot;, holding uninitialize data in a program.</li>
+</ul>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;linker-script&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;notes-parsing&#x2F;">Parsing Takeaways</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-04-03</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <h2 id="cfg">CFG</h2>
+<p>A CFG is a 4-tuple $(V, \Sigma, S,\rightarrow)$</p>
+<ul>
+<li>$V$ is set of nonterminals</li>
+<li>$\Sigma$ is set of terminals</li>
+<li>$S\in V$ is the start symbol</li>
+<li>$\rightarrow\subset V\times (V\cup \Sigma)^*$ is relation, called the products</li>
+</ul>
+<p><strong>Derivation</strong> is a sequence of replacement from left handside to <strong>RHS</strong> of grammar rules.</p>
+<p><strong>Notation</strong> $\Rightarrow^*$ means any steps of derivation.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;notes-parsing&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;issue-websocket&#x2F;">WebSocket Problem with Proxy</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-03-21</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <!-- 
+# WebSocket on ESP32 Fails, 'Not a websocket request'
+
+--- -->
+<p>I've been working on build a visual studio code extension for a better developing experience on ESP32, MicroPython. But without any basic knowledge for front-end development, this process is quite tough for me.</p>
+<p>To establish a wireless connection, the first thing that came into my mind is that I should check the official tools. So I checked the source code of project <a href="https://github.com/micropython/webrepl">webrepl</a>, a WebREPL terminal client, which also has a coarse front-end written in Javascript.</p>
+<h2 id="problem">Problem</h2>
+<p>It seemed to be simple to connect to the webrepl server running on the board, as the code in <a href="https://github.com/micropython/webrepl/blob/master/webrepl.html">webrepl.html</a> showed. But when I was using the npm package <code>ws</code> or <code>websocket</code>  in Typescript to connect to it, the connection was simply cannot be established. The error in the serial connection illustrated that</p>
+<pre style="background-color:#1e1e1e;color:#dcdcdc;"><code><span>Traceback (most recent call last):
+</span><span>  File &quot;webrepl.py&quot;, line 43, in accept_conn
+</span><span>  File &quot;websocket_helper.py&quot;, line 39, in server_handshakej
+</span><span>OSError: Not a websocket request
+</span><span>
+</span><span>WebREPL connection from: (&#39;192.168.137.1&#39;, 2935)
+</span><span>
+</span></code></pre>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;bittervan.github.io&#x2F;issue-websocket&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                        </div>
+                        <nav class="pagination">
+                            
+                            
+                        </nav>
+                    
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://bittervan.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title> - Research</title>
+	<link href="https://bittervan.github.io/categories/research/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://bittervan.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-04-06T00:00:00+00:00</updated>
+	<id>https://bittervan.github.io/categories/research/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Linker Script Segments</title>
+		<published>2022-04-06T00:00:00+00:00</published>
+		<updated>2022-04-06T00:00:00+00:00</updated>
+		<link href="https://bittervan.github.io/linker-script/" type="text/html"/>
+		<id>https://bittervan.github.io/linker-script/</id>
+		<content type="html">&lt;p&gt;Linker is under the control of linker script, thus it can put the codes and variables at the correct place in a logical address space. There are 4 basic segments:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;.text&lt;&#x2F;code&gt; holding the programs.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;.data&lt;&#x2F;code&gt; holding initialized data.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;.rodata&lt;&#x2F;code&gt; holding read-only data.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;.bss&lt;&#x2F;code&gt; acronym for &amp;quot;Block Starting Symbols&amp;quot;, holding uninitialize data in a program.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;Here shows a linker script used in building rCore of THU:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;linker script&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-linker script &quot;&gt;&lt;code class=&quot;language-linker script&quot; data-lang=&quot;linker script&quot;&gt;&lt;span&gt;OUTPUT_ARCH(riscv)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;ENTRY&lt;&#x2F;span&gt;&lt;span&gt;(_start)
+&lt;&#x2F;span&gt;&lt;span&gt;BASE_ADDRESS = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0x80200000&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;SECTIONS
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	. = BASE_ADDRESS;
+&lt;&#x2F;span&gt;&lt;span&gt;	skernel = .;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	stext = .;
+&lt;&#x2F;span&gt;&lt;span&gt;	.text : {
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.text.entry)
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.text .text.*)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	. = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;ALIGN&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;4K&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;	etext = .;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	srodata = .;
+&lt;&#x2F;span&gt;&lt;span&gt;	.rodata : {
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.rodata .rodata.*)
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.srodata .srodata.*)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	. = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;ALIGN&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;4K&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;	erodata = .;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	sdata = .;
+&lt;&#x2F;span&gt;&lt;span&gt;	.data : {
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.data .data.*)
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.sdata .sdata.*)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	. = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;ALIGN&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;4K&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;	edata = .;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	.bss : {
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.bss.stack)
+&lt;&#x2F;span&gt;&lt;span&gt;		sbss = .;
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.bss .bss.*)
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.sbss .sbss.*)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	. = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;ALIGN&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;4K&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;	ebss = .;
+&lt;&#x2F;span&gt;&lt;span&gt;	ekernel = .;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&#x2F;DISCARD&#x2F; : {
+&lt;&#x2F;span&gt;&lt;span&gt;		*(.eh_frame)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In the script, instruction with &lt;code&gt;. = &amp;lt;some_address&amp;gt;&lt;&#x2F;code&gt; or &lt;code&gt;&amp;lt;some_address&amp;gt; = .&lt;&#x2F;code&gt; is quite helpful interacting with current address &lt;code&gt;.&lt;&#x2F;code&gt;. &lt;&#x2F;p&gt;
+&lt;p&gt;And instruction &lt;code&gt;ALIGN(SIZE)&lt;&#x2F;code&gt; calculates the next address that is aligned to the given block size. Here we use page size to ensure the segments are scattered in different pages, since the priviledge control of hardware is usually with a granularity of page size.&lt;&#x2F;p&gt;
+&lt;p&gt;The extra tags, like &lt;code&gt;edata&lt;&#x2F;code&gt;, &lt;code&gt;ebss&lt;&#x2F;code&gt; defined here can be accessed as tags in other source code files like this&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#1e1e1e;color:#dcdcdc;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span&gt;clear_bss() {
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;extern &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d69d85;&quot;&gt;&amp;quot;C&amp;quot; &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span&gt;sbss();
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span&gt;ebss();
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	(sbss &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;as usize..&lt;&#x2F;span&gt;&lt;span&gt;ebss &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;as usize&lt;&#x2F;span&gt;&lt;span&gt;).for_each(|a| {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;unsafe &lt;&#x2F;span&gt;&lt;span&gt;{ (a &lt;&#x2F;span&gt;&lt;span style=&quot;color:#569cd6;&quot;&gt;as *mut u8&lt;&#x2F;span&gt;&lt;span&gt;).write_volatile(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b5cea8;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) }
+&lt;&#x2F;span&gt;&lt;span&gt;	});
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+	</entry>
+</feed>
